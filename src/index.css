@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+*{
+    font-family: 'Outfit';
+    transition-duration: 300ms;
+}
+a{
+    transition-duration: 300ms;
+    color: rgba(255, 255, 255, 0.589);
+}
+a:hover{
+    color: oklch(79.5% 0.184 86.047);
+}
+p{
+    opacity: 50%;
+}
