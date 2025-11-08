@@ -3,7 +3,17 @@ import axios from "axios";
 import gsap from "gsap";
 import React, { useEffect, useRef, useState } from "react";
 
-export const CardFunc = ({ title, rating, description, poster }) => {
+export const CardFunc = ({
+  id,
+  title,
+  rating,
+  description,
+  poster,
+  handlePop,
+  genre,
+  type,
+  updatefunc
+}) => {
   const [descriptionToggle, setDescriptionToggle] = useState(false);
   const CardRef = useRef();
   useGSAP(() => {
@@ -12,6 +22,21 @@ export const CardFunc = ({ title, rating, description, poster }) => {
       ease: "power1.inOut",
     });
   });
+
+  const handleDelete = async (id) => {
+    try {
+      let response = await axios.delete(
+        import.meta.env.VITE_URL + `content/${id}`
+      );
+      if (response.status == 200) {
+        alert("deleted successfully");
+      }
+      console.log(response);
+    } catch (error) {
+      alert("failed to delete");
+      console.log(error);
+    }
+  };
   return (
     <>
       <div className="py-2" ref={CardRef}>
@@ -58,6 +83,28 @@ export const CardFunc = ({ title, rating, description, poster }) => {
               )
             </h3>
             <p className="font-normal text-sm">{description}</p>
+            <button
+              onClick={async(e) => {
+                e.preventDefault();
+                if (confirm("Are you sure you want to delete this content?")) {
+                  let response  = await handleDelete(id);
+                  let {update, setUpdate} = updatefunc
+                 setUpdate(update?false:true)
+                }
+              }}
+              className="absolute cursor-pointer w-20 mx-1 border-1 right-2 bottom-2 rounded-sm hover:bg-black hover:text-[#fbfafb]"
+            >
+              Delete
+            </button>{" "}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handlePop(id, title, rating, description, poster, genre, type);
+              }}
+              className="absolute cursor-pointer w-20 mx-1 border-1 left-2 bottom-2 rounded-sm hover:bg-black hover:text-[#fbfafb]"
+            >
+              Edit
+            </button>
           </div>
         )}
       </div>
@@ -65,28 +112,37 @@ export const CardFunc = ({ title, rating, description, poster }) => {
   );
 };
 
-const LandingPage = ({ data, handlePop }) => {
-  const typeOptions = ["Movie", "Anime", "Webseries", "Anime Movie"];
+const LandingPage = ({ data, handlePop ,updatefunc}) => {
+  const typeOptions = ["Game", "Anime", "Movie", "Webseries", "Anime Movie"];
   return (
     <div className="h-max w-full p-4">
-      {typeOptions.map((Element, indx) => ( 
-          <div key={indx} className="mt-5">
-          <h1 className="text-4xl text-start font-bold">{Element=="Webseries"?"Webseries":Element+"s"}</h1>
-        <div key={indx} className="px-4 flex overflow-auto gap-5 justify-start ">
-          {data
-            .filter((ele) => ele.type == Element.toLowerCase())
-            .map((ele, idx) => (
-              <CardFunc
-              key={idx}
-              title={ele.title}
-              rating={ele.rating}
-              poster={ele.poster}
-              description={ele.description}
-              />
-              
-            ))}
+      {typeOptions.map((Element, indx) => (
+        <div key={indx} className="mt-5">
+          <h1 className="text-4xl text-start font-bold">
+            {Element == "Webseries" ? "Webseries" : Element + "s"}
+          </h1>
+          <div
+            key={indx}
+            className="px-4 flex overflow-auto gap-5 justify-start "
+          >
+            {data
+              .filter((ele) => ele.type == Element.toLowerCase())
+              .map((ele) => (
+                <CardFunc
+                  handlePop={handlePop}
+                  id={ele._id}
+                  key={ele._id}
+                  title={ele.title}
+                  rating={ele.rating}
+                  poster={ele.poster}
+                  description={ele.description}
+                  genre={ele.genre}
+                  type={ele.type}
+                  updatefunc={updatefunc}
+                />
+              ))}
+          </div>
         </div>
-      </div>
       ))}
       <span
         onClick={(e) => {

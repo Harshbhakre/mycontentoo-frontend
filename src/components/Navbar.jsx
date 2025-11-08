@@ -1,8 +1,14 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import AddContentPage from "./AddContentPage";
 import { Link } from "react-router-dom";
 
 const Navbar = ({ handlePop,setsearchedItem }) => {
+  const [userId, setuserId] = useState('')
+
+  useEffect(() => {
+   setuserId(localStorage.getItem(userId))
+  }, [])
+
   return (
     // <div className="absolute w-full top-0">
 
@@ -27,6 +33,7 @@ const Navbar = ({ handlePop,setsearchedItem }) => {
           </span>
           <Link className="hover:font-bold" to="/">Home</Link>
           <Link className="hover:font-bold" to="/genre">Genre</Link>
+          {/* {userId ?<><Link onClick={()=>{localStorage.setItem('userId',null)}} className="hover:font-bold" to="/login">Logout</Link> */}
           <a
             onClick={(e) => {
               e.preventDefault();
@@ -36,6 +43,7 @@ const Navbar = ({ handlePop,setsearchedItem }) => {
             >
             Add new
           </a>
+          {/* </>:<Link className="hover:font-bold" to="/login">Login</Link>} */}
         </div>
       </div>
     </div>
