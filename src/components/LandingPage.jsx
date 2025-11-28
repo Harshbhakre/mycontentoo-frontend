@@ -1,7 +1,10 @@
 import { useGSAP } from "@gsap/react";
 import axios from "axios";
 import gsap from "gsap";
+import { Link } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
+import { ClimbingBoxLoader } from "react-spinners";
+import CubeLoader from "./CubeLoader";
 
 export const CardFunc = ({
   id,
@@ -12,9 +15,20 @@ export const CardFunc = ({
   handlePop,
   genre,
   type,
-  updatefunc
+  updatefunc,
+  users
 }) => {
+  const [loading, setLoading] = useState(false)
   const [descriptionToggle, setDescriptionToggle] = useState(false);
+    const [userId, setuserId] = useState("");
+  
+    useEffect(() => {
+      async function UserCheck() {
+        let User = await localStorage.getItem("UserId");
+        setuserId(User);
+      }
+      UserCheck();
+    }, []);
   const CardRef = useRef();
   useGSAP(() => {
     gsap.to(CardRef.current, {
@@ -24,6 +38,7 @@ export const CardFunc = ({
   });
 
   const handleDelete = async (id) => {
+    setLoading(true)
     try {
       let response = await axios.delete(
         import.meta.env.VITE_URL + `content/${id}`
@@ -35,10 +50,13 @@ export const CardFunc = ({
     } catch (error) {
       alert("failed to delete");
       console.log(error);
+    }finally{
+      setLoading(false)
     }
   };
   return (
     <>
+         {loading?<CubeLoader /> :
       <div className="py-2" ref={CardRef}>
         {!descriptionToggle ? (
           <div
@@ -83,6 +101,8 @@ export const CardFunc = ({
               )
             </h3>
             <p className="font-normal text-sm">{description}</p>
+            {userId && users.includes(userId)?
+            <>
             <button
               onClick={async(e) => {
                 e.preventDefault();
@@ -92,8 +112,8 @@ export const CardFunc = ({
                  setUpdate(update?false:true)
                 }
               }}
-              className="absolute cursor-pointer w-20 mx-1 border-1 right-2 bottom-2 rounded-sm hover:bg-black hover:text-[#fbfafb]"
-            >
+              className="absolute cursor-pointer border-1 right-2 bottom-2 px-4  bg-yellow-500 !text-black font-semibold rounded-lg hover:bg-yellow-600"
+>
               Delete
             </button>{" "}
             <button
@@ -101,21 +121,38 @@ export const CardFunc = ({
                 e.preventDefault();
                 handlePop(id, title, rating, description, poster, genre, type);
               }}
-              className="absolute cursor-pointer w-20 mx-1 border-1 left-2 bottom-2 rounded-sm hover:bg-black hover:text-[#fbfafb]"
+              className="absolute cursor-pointer border-1 left-2 bottom-2 px-4  bg-yellow-500 !text-black font-semibold rounded-lg hover:bg-yellow-600"
             >
               Edit
             </button>
+            </>:
+            userId? <>
+            <div className="mt-[5%]"><Link
+  to="/editrequest"
+  onClick={()=>{let {request,setRequest}=updatefunc;
+setRequest({id, userId})}}
+  className="px-4 py-2 bg-yellow-500 !text-black font-semibold rounded-lg hover:bg-yellow-600"
+>
+  Request
+</Link>
+
+
+            </div>            
+            </>:<></>
+            }
           </div>
         )}
-      </div>
+      </div>}
     </>
   );
 };
 
 const LandingPage = ({ data, handlePop ,updatefunc}) => {
+  let {loading,setLoading} = updatefunc
   const typeOptions = ["Game", "Anime", "Movie", "Webseries", "Anime Movie"];
   return (
-    <div className="h-max w-full p-4">
+    <div className="h-max w-full p-4 relative">
+        
       {typeOptions.map((Element, indx) => (
         <div key={indx} className="mt-5">
           <h1 className="text-4xl text-start font-bold">
@@ -125,9 +162,11 @@ const LandingPage = ({ data, handlePop ,updatefunc}) => {
             key={indx}
             className="px-4 flex overflow-auto gap-5 justify-start "
           >
+            {loading && <CubeLoader />}
             {data
               .filter((ele) => ele.type == Element.toLowerCase())
               .map((ele) => (
+                
                 <CardFunc
                   handlePop={handlePop}
                   id={ele._id}
@@ -139,6 +178,7 @@ const LandingPage = ({ data, handlePop ,updatefunc}) => {
                   genre={ele.genre}
                   type={ele.type}
                   updatefunc={updatefunc}
+                  users={ele.users}
                 />
               ))}
           </div>

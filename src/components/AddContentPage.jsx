@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { DataContext } from "../App";
+import CubeLoader from "./CubeLoader";
 
 const AddContentPage = ({ handlePop,dataUpdate ,setDataUpdate,updatefunc}) => {
   const popdiv = useRef(null);
@@ -40,6 +41,7 @@ setDescription("")
 }
 
   const apiPost = async () => {
+    let userId =await localStorage.getItem("UserId")
     if (
       title.length === 0 ||
       genre.length === 0 ||
@@ -62,7 +64,7 @@ if (dataUpdate.title) {
 } else {
   response = await axios.post(
     `${import.meta.env.VITE_URL}content`,
-    { title, genre, rating, poster: posterLink, description, type }
+    { title, genre, rating, poster: posterLink, description, type,users:[userId] }
   );
 }
 
@@ -89,6 +91,7 @@ if (dataUpdate.title) {
       ref={popdiv}
       className="absolute w-full h-screen flex items-center justify-center z-[50] backdrop-blur-sm"
     >
+           {loading? <div className="h-screen w-full bg-black flex justify-center items-center"><CubeLoader /> </div>:
       <div className="relative w-[400px] p-6 rounded-2xl bg-[#0B0B0B] border border-gray-700 shadow-2xl">
         {/* Close Button */}
         <button
@@ -195,7 +198,7 @@ if (dataUpdate.title) {
             )}
           </button>
         </form>
-      </div>
+      </div>}
     </div>
   );
 };

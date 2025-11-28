@@ -8,10 +8,9 @@ export default function Signup() {
   const handleSubmit =async (e) => {
     e.preventDefault();
    try {
-    const res = await axios.post(`${import.meta.env.VITE_URL}/login`, form);
+    const res = await axios.post(`${import.meta.env.VITE_URL}signup`, form);
     if (res.status === 200) {
-      localStorage.setItem("UserId", res.data.userId);
-      window.location.href = "/";
+      window.location.href = "/login";
     }
   } catch (err) {
     console.error(err);

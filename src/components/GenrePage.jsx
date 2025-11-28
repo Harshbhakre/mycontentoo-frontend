@@ -1,26 +1,36 @@
-import React, { useContext, useState } from "react";
-import {DataContext} from '../App'
+import React, { useContext, useEffect, useState } from "react";
+import { DataContext } from "../App";
 import { CardFunc } from "./LandingPage";
 
 const GenrePage = () => {
-  let contextData = useContext(DataContext)
-  const [firstRender, setfirstRender] = useState(true)
-  const [newData, setnewData] = useState([])
- function handleFilter(e, ele) {
-  e?.preventDefault();
-  if (firstRender) {
-    setnewData(contextData);
-    setfirstRender(false);
-    return; 
-  } 
-  ele = ele.toLowerCase()
-  const filtered = contextData.filter(item => item.genre.toLowerCase().includes(ele));
-  setnewData(filtered);
-}
+  const contextData = useContext(DataContext);
 
-if (firstRender) handleFilter();
-  
-  const [genresData, setgenresData] = useState([
+  const [newData, setNewData] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState("");
+
+  useEffect(() => {
+    if (contextData?.newData) {
+      setNewData(contextData.newData);
+    }
+  }, [contextData]);
+
+  function handleFilter(genre) {
+    setSelectedGenre(genre);
+
+    if (!genre) {
+      // show all items on "reset"
+      setNewData(contextData.newData);
+      return;
+    }
+
+    const filtered = contextData.newData.filter((item) =>
+      item.genre.toLowerCase().includes(genre.toLowerCase())
+    );
+
+    setNewData(filtered);
+  }
+
+  const genresData = [
     "Action",
     "Adventure",
     "Comedy",
@@ -40,23 +50,28 @@ if (firstRender) handleFilter();
     "Historical",
     "War",
     "Music",
-    "Documentary",
-  ]);
-  return <div className="h-max w-full">
-    <div id="geners" className="flex justify-center flex-wrap items-center gap-2 min-h-25 p-2 w-full bg-[#303030]">
-  {genresData.map((ele, idx) => (
-    <button
-      key={idx} 
-      onClick={(e)=>{handleFilter(e,ele)}}
-      className="button p-2 transition-transform duration-200 transform hover:scale-120 hover:text-[#f3bc53] cursor-pointer rounded-lg"
-      style={{ transformOrigin: "center" }}
-      type="button"
-    >
-      {ele}
-    </button>
-  ))}
-</div>
-  <div className="p-10 flex flex-wrap h-max gap-10 justify-center">
+    "Documentary"
+  ];
+
+  return (
+    <div className="h-max w-full">
+      <div
+        id="genres"
+        className="flex justify-center flex-wrap items-center gap-2 min-h-25 p-2 w-full bg-[#303030]"
+      >
+        {genresData.map((ele, idx) => (
+          <button
+            key={idx}
+            onClick={() => handleFilter(ele)}
+            className={`button p-2 rounded-lg transition-transform duration-200 transform hover:scale-110 hover:text-[#f3bc53]
+              ${selectedGenre === ele ? "text-[#f3bc53] font-bold" : ''}`}
+          >
+            {ele}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-10 flex flex-wrap h-max gap-10 justify-center">
         {newData.map((ele, idx) => (
           <CardFunc
             key={idx}
@@ -67,7 +82,8 @@ if (firstRender) handleFilter();
           />
         ))}
       </div>
-  </div>;
+    </div>
+  );
 };
 
 export default GenrePage;

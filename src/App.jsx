@@ -7,11 +7,16 @@ import GenrePage from "./components/GenrePage";
 import { Route, Routes } from "react-router-dom";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import ManageAccess from "./components/ManageAccess";
+
+import EditRequestPopup from "./components/EditRequestPopup";
 
 export let DataContext = createContext();
 const App = () => {
+    const [loading, setLoading] = useState(false)
   const [addPopup, setAddPopup] = useState(false);
   const [update, setUpdate] = useState(true);
+  const [request, setRequest] = useState([])
   const [data, setdata] = useState([]);
   const [newData, setnewData] = useState([]);
   const [searchedItem, setsearchedItem] = useState("");
@@ -29,6 +34,7 @@ const App = () => {
 
   useEffect(() => {
     const fetchContent = async () => {
+      setLoading(true)
       try {
         let response = await axios.get(import.meta.env.VITE_URL, {
           headers: { userid: localStorage.getItem("userId") },
@@ -43,6 +49,8 @@ const App = () => {
         }
       } catch (error) {
         console.log(error);
+      }finally{
+        setLoading(false)
       }
     };
     fetchContent();
@@ -54,19 +62,26 @@ const App = () => {
 
   return (
     <DataContext.Provider value={{ newData, setUpdate, update }}>
-      <div className="duration-300 relative bg-[#0B0B0B] h-max sm:w-full text-white text-center">
+      <div className="duration-300 relative bg-[#0B0B0B] h-max w-full sm:w-full text-white text-center">
         {addPopup && <AddContentPage handlePop={handlePop} dataUpdate={dataUpdate?dataUpdate:null} setDataUpdate={setDataUpdate} updatefunc={{update, setUpdate}}/>}
         <Navbar handlePop={handlePop} setsearchedItem={setsearchedItem} />
         <Routes>
           <Route
             path="/"
-            element={<LandingPage data={newData} handlePop={handlePop}  updatefunc={{update, setUpdate}} />}
+            element={
+            <LandingPage data={newData} handlePop={handlePop}  updatefunc={{update, setUpdate,request,setRequest,loading,setLoading}} />
+          }
           />
+          <Route path="/editrequest" element={<EditRequestPopup requestInfo={{request,setRequest}}/>} />
           <Route path="/genre" element={<GenrePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/manageaccess" element={<ManageAccess/>} />
         </Routes>
-      </div>
+      </div> 
+      {/* <Loading /> */}
+      
+        
     </DataContext.Provider>
   );
 };
